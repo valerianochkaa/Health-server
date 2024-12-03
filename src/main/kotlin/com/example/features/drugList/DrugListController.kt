@@ -4,11 +4,85 @@ import com.example.database.drugCategory.DrugCategory
 import com.example.database.drugLike.DrugLike
 import com.example.database.drugs.Drugs
 import com.example.database.drugsInstrucions.DrugInstructions
+import com.example.database.tokens.Tokens
+import com.example.database.users.Users
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.transactions.transaction
 
 class DrugListController(private val call: ApplicationCall) {
+    suspend fun insertLike() {
+        val token = getToken() ?: run {
+            call.respond(HttpStatusCode.BadRequest, "Token is missing")
+            return
+        }
+        val userId = getUserIdByToken(token) ?: run {
+            call.respond(HttpStatusCode.Unauthorized, "Invalid token or user not found")
+            return
+        }
+        val drugId = call.parameters["drugId"]?.toIntOrNull()
+            ?: return call.respond(HttpStatusCode.BadRequest, "Invalid drugId")
+        val drugExists = transaction {
+            Drugs.select { Drugs.drugId eq drugId }.count() > 0
+        }
+        if (!drugExists) return call.respond(HttpStatusCode.NotFound, "Drug with ID $drugId not found")
+        transaction {
+            DrugLike.insert {
+                it[drugIdLike] = drugId
+                it[userIdDrugLike] = userId
+            }
+        }
+        call.respond(HttpStatusCode.Created, "Like added successfully for drug ID $drugId")
+    }
+
+    suspend fun deleteLikeByDrugId() {
+        val token = getToken() ?: run {
+            call.respond(HttpStatusCode.BadRequest, "Token is missing")
+            return
+        }
+        val userId = getUserIdByToken(token) ?: run {
+            call.respond(HttpStatusCode.Unauthorized, "Invalid token or user not found")
+            return
+        }
+        val drugId = call.parameters["drugId"]?.toIntOrNull()
+            ?: return call.respond(HttpStatusCode.BadRequest, "Invalid drugId")
+        val likeExists = transaction {
+            DrugLike.select {
+                (DrugLike.drugIdLike eq drugId) and (DrugLike.userIdDrugLike eq userId)
+            }.count() > 0
+        }
+        if (!likeExists) return call.respond(HttpStatusCode.NotFound, "Like for drug ID $drugId not found for user ID $userId")
+        transaction {
+            DrugLike.deleteWhere {
+                (DrugLike.drugIdLike eq drugId) and (DrugLike.userIdDrugLike eq userId)
+            }
+        }
+
+        call.respond(HttpStatusCode.OK, "Like for drug ID $drugId has been deleted")
+    }
+
+    private fun getToken(): String? {
+        return call.request.headers["Authorization"]?.removePrefix("Bearer ")
+    }
+
+    private fun getUserIdByToken(token: String): Int? {
+        val tokenRecord = transaction {
+            Tokens.select { Tokens.token eq token }.singleOrNull()
+        }
+        return tokenRecord?.let {
+            val userEmail = it[Tokens.tokenEmail]
+            transaction {
+                Users.select { Users.userEmail eq userEmail }.singleOrNull()?.get(Users.userId)
+            }
+        }
+    }
+
     suspend fun getAllDrugLikes() {
         val userId = call.parameters["userId"]?.toIntOrNull()
         if (userId != null) {

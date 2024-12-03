@@ -52,6 +52,14 @@ fun Application.configureDrugListRouting() {
                 val controller = DrugListController(call)
                 controller.getDrugInstructionByDrugId()
             }
+            post("/insertLike/{drugId}"){
+                val controller = DrugListController(call)
+                controller.insertLike()
+            }
+            delete("/deleteLike/{drugId}") {
+                val controller = DrugListController(call)
+                controller.deleteLikeByDrugId()
+            }
         }
     }
 }
