@@ -3,6 +3,7 @@ package com.example.database.drugs
 import com.example.database.drugCategory.DrugCategory
 import com.example.database.drugCategory.DrugCategoryDTO
 import com.example.database.drugsInstrucions.DrugInstructions
+import com.example.database.drugsInstrucions.DrugInstructionsDTO
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -15,21 +16,6 @@ object Drugs : Table("drugs") {
     val drugAnalog = varchar("drugAnalog", 50)
 
     override val primaryKey = PrimaryKey(drugId, name = "PK_Drug_ID")
-
-    fun getAllDrugs(): List<DrugsDTO> {
-        return transaction {
-            Drugs.selectAll().mapNotNull { row ->
-                DrugsDTO(
-                    drugId = row[drugId],
-                    drugCategoryId = row[drugCategoryId],
-                    drugInstructionId = row[drugInstructionId],
-                    drugName = row[drugName],
-                    drugPrice = row[drugPrice],
-                    drugAnalog = row[drugAnalog]
-                )
-            }
-        }
-    }
 
     fun getDrugById(drugId: Int): DrugsDTO? {
         return transaction {
@@ -46,6 +32,32 @@ object Drugs : Table("drugs") {
                 }.singleOrNull()
         }
     }
+
+    fun getDrugInstructionsByDrugId(drugId: Int): DrugInstructionsDTO? {
+        return transaction {
+            Drugs.select { Drugs.drugId eq drugId }
+                .mapNotNull { row ->
+                    val instructionId = row[drugInstructionId]
+                    DrugInstructions.getDrugInstructionById(instructionId)
+                }.singleOrNull()
+        }
+    }
+
+    fun getAllDrugs(): List<DrugsDTO> {
+        return transaction {
+            Drugs.selectAll().mapNotNull { row ->
+                DrugsDTO(
+                    drugId = row[drugId],
+                    drugCategoryId = row[drugCategoryId],
+                    drugInstructionId = row[drugInstructionId],
+                    drugName = row[drugName],
+                    drugPrice = row[drugPrice],
+                    drugAnalog = row[drugAnalog]
+                )
+            }
+        }
+    }
+
 
     fun getDrugsByCategory(categoryId: Int): List<DrugsDTO> {
         return transaction {
@@ -73,6 +85,5 @@ object Drugs : Table("drugs") {
             }
         }
     }
-
 }
 

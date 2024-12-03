@@ -18,6 +18,10 @@ fun Application.configureDrugListRouting() {
                 val controller = DrugListController(call)
                 controller.getAllDrugsByCategory()
             }
+            get("/instructions") {
+                val controller = DrugListController(call)
+                controller.getAllDrugInstructions()
+            }
         }
         route("/drug") {
             get("/{drugId}") {
@@ -28,10 +32,17 @@ fun Application.configureDrugListRouting() {
                 val controller = DrugListController(call)
                 controller.getDrugCategoryById()
             }
-
             get("/categoryByDrugId/{drugId}") {
                 val controller = DrugListController(call)
                 controller.getDrugCategoryByDrugId()
+            }
+            get("/instruction/{drugInstructionId}") {
+                val controller = DrugListController(call)
+                controller.getDrugInstructionById()
+            }
+            get("/instructionByDrugId/{drugId}") {
+                val controller = DrugListController(call)
+                controller.getDrugInstructionByDrugId()
             }
         }
     }

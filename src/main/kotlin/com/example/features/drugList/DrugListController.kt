@@ -3,6 +3,7 @@ package com.example.features.drugList
 import com.example.database.drugCategory.DrugCategory
 import com.example.database.drugCategory.DrugCategoryDTO
 import com.example.database.drugs.Drugs
+import com.example.database.drugsInstrucions.DrugInstructions
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -21,9 +22,15 @@ class DrugListController(private val call: ApplicationCall) {
         else call.respond(HttpStatusCode.NotFound, "Drug category not found for ID $drugId")
     }
 
-    suspend fun getAllDrugs() {
-        val drugs = Drugs.getAllDrugs()
-        call.respond(drugs)
+    suspend fun getDrugInstructionByDrugId() {
+        val drugId = call.parameters["drugId"]?.toIntOrNull()
+        if (drugId == null) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid drug ID")
+            return
+        }
+        val instructions = Drugs.getDrugInstructionsByDrugId(drugId)
+        if (instructions != null) call.respond(HttpStatusCode.OK, instructions)
+        else call.respond(HttpStatusCode.NotFound, "No instructions found for drug ID $drugId")
     }
 
     suspend fun getAllDrugCategories() {
@@ -42,6 +49,11 @@ class DrugListController(private val call: ApplicationCall) {
         } else {
             call.respond(HttpStatusCode.BadRequest, "Invalid category ID")
         }
+    }
+
+    suspend fun getAllDrugInstructions() {
+        val drugInstructions = DrugInstructions.getAllDrugInstructions()
+        call.respond(drugInstructions)
     }
 
     suspend fun getDrugById() {
@@ -70,6 +82,26 @@ class DrugListController(private val call: ApplicationCall) {
         } else {
             call.respond(HttpStatusCode.BadRequest, "Invalid category ID")
         }
+    }
+
+
+    suspend fun getDrugInstructionById() {
+        val drugInstructionId = call.parameters["drugInstructionId"]?.toIntOrNull()
+        if (drugInstructionId != null) {
+            val instruction = DrugInstructions.getDrugInstructionById(drugInstructionId)
+            if (instruction != null) {
+                call.respond(instruction)
+            } else {
+                call.respond(HttpStatusCode.NotFound, "Drug instruction not found")
+            }
+        } else {
+            call.respond(HttpStatusCode.BadRequest, "Invalid drug instruction ID")
+        }
+    }
+
+    suspend fun getAllDrugs() {
+        val drugs = Drugs.getAllDrugs()
+        call.respond(drugs)
     }
 }
 
