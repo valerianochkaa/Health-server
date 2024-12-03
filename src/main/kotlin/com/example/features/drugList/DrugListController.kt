@@ -1,16 +1,42 @@
 package com.example.features.drugList
 
 import com.example.database.drugCategory.DrugCategory
-import com.example.database.drugCategory.DrugCategoryDTO
+import com.example.database.drugLike.DrugLike
 import com.example.database.drugs.Drugs
 import com.example.database.drugsInstrucions.DrugInstructions
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.response.*
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
 
 class DrugListController(private val call: ApplicationCall) {
+    suspend fun getAllDrugLikes() {
+        val userId = call.parameters["userId"]?.toIntOrNull()
+        if (userId != null) {
+            val drugLikes = DrugLike.getDrugLikesByUser(userId)
+            if (drugLikes.isEmpty()) {
+                call.respond(HttpStatusCode.NotFound, "No drug likes found for user ID: $userId")
+            } else {
+                call.respond(HttpStatusCode.OK, drugLikes)
+            }
+        } else {
+            call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+        }
+    }
+    suspend fun getDrugLikesByUser() {
+        val userId = call.parameters["userId"]?.toIntOrNull()
+        if (userId != null) {
+            val drugLikes = DrugLike.getDrugLikesByUser(userId)
+            if (drugLikes.isEmpty()) {
+                call.respond(HttpStatusCode.NotFound, "No drug likes found for user ID: $userId")
+            } else {
+                val drugs = drugLikes.map { Drugs.getDrugById(it.drugIdLike) }.filterNotNull()
+                call.respond(HttpStatusCode.OK, drugs)
+            }
+        } else {
+            call.respond(HttpStatusCode.BadRequest, "Invalid user ID")
+        }
+    }
+
     suspend fun getDrugCategoryByDrugId() {
         val drugId = call.parameters["drugId"]?.toIntOrNull()
         if (drugId == null) {

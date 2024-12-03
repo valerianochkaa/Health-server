@@ -5,7 +5,7 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object DrugCategory: Table("drug_category") {
+object DrugCategory: Table("drug_categories") {
     val drugCategoryId = integer("drugCategoryId").autoIncrement()
     val drugCategoryName = varchar("drugCategoryName", 50)
 
