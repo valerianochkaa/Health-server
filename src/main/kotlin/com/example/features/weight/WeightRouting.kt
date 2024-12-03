@@ -1,6 +1,5 @@
 package com.example.features.weight
 
-import com.example.features.temperature.TemperatureController
 import io.ktor.server.application.*
 import io.ktor.server.routing.*
 

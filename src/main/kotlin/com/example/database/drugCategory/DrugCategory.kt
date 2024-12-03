@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object DrugCategory: Table("drug_category") {
     val drugCategoryId = integer("drugCategoryId").autoIncrement()
-    val drugCategoryName = varchar("drugCategoryName", 50).nullable()
+    val drugCategoryName = varchar("drugCategoryName", 50)
 
     override val primaryKey = PrimaryKey(drugCategoryId, name = "PK_Drug_Category_ID")
 

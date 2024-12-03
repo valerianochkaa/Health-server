@@ -23,7 +23,7 @@ object DrugLike : Table("drug_like") {
         }
     }
 
-    fun getDrugLikeByIds(drugId: Int, userId: Int): DrugLikeDTO? {
+    fun getDrugLikeById(drugId: Int, userId: Int): DrugLikeDTO? {
         return transaction {
             DrugLike.select {
                 (DrugLike.drugIdLike eq drugId) and (DrugLike.userIdDrugLike eq userId)

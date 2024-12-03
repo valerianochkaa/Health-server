@@ -46,17 +46,33 @@ object Drugs : Table("drugs") {
                 }.singleOrNull()
         }
     }
-//
-//    fun getDrugCategoryById(categoryId: Int): DrugCategoryDTO? {
-//        return transaction {
-//            DrugCategory.select { DrugCategory.drugCategoryId eq categoryId }
-//                .mapNotNull { row ->
-//                    DrugCategoryDTO(
-//                        drugCategoryId = row[DrugCategory.drugCategoryId],
-//                        drugCategoryName = row[DrugCategory.drugCategoryName]
-//                    )
-//                }.singleOrNull()
-//        }
-//    }
+
+    fun getDrugsByCategory(categoryId: Int): List<DrugsDTO> {
+        return transaction {
+            Drugs.select { Drugs.drugCategoryId eq categoryId }
+                .mapNotNull { row ->
+                    DrugsDTO(
+                        drugId = row[drugId],
+                        drugCategoryId = row[drugCategoryId],
+                        drugInstructionId = row[drugInstructionId],
+                        drugName = row[drugName],
+                        drugPrice = row[drugPrice],
+                        drugAnalog = row[drugAnalog]
+                    )
+                }
+        }
+    }
+
+    fun getCategoryByDrugId(drugId: Int): DrugCategoryDTO? {
+        return transaction {
+            val categoryId = Drugs.select { Drugs.drugId eq drugId }
+                .mapNotNull { row -> row[Drugs.drugCategoryId] }
+                .singleOrNull()
+            categoryId?.let {
+                DrugCategory.getDrugCategoryById(it)
+            }
+        }
+    }
+
 }
 

@@ -21,8 +21,10 @@ fun Application.module() {
     configureRouting()
     configureLoginRouting()
     configureRegisterRouting()
+
     configureWeightRouting()
     configureTemperatureRouting()
     configurePressureRouting()
+
     configureDrugListRouting()
 }

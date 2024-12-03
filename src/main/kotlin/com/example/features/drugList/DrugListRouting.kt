@@ -1,9 +1,6 @@
 package com.example.features.drugList
 
-import com.example.database.drugs.Drugs
-import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Application.configureDrugListRouting() {
@@ -13,11 +10,28 @@ fun Application.configureDrugListRouting() {
                 val controller = DrugListController(call)
                 controller.getAllDrugs()
             }
-
-
+            get("/categories") {
+                val controller = DrugListController(call)
+                controller.getAllDrugCategories()
+            }
+            get("/categories/{drugCategoryId}") {
+                val controller = DrugListController(call)
+                controller.getAllDrugsByCategory()
+            }
+        }
+        route("/drug") {
             get("/{drugId}") {
                 val controller = DrugListController(call)
                 controller.getDrugById()
+            }
+            get("/category/{drugCategoryId}") {
+                val controller = DrugListController(call)
+                controller.getDrugCategoryById()
+            }
+
+            get("/categoryByDrugId/{drugId}") {
+                val controller = DrugListController(call)
+                controller.getDrugCategoryByDrugId()
             }
         }
     }

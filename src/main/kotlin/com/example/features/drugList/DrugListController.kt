@@ -1,33 +1,78 @@
 package com.example.features.drugList
 
-import com.example.database.drugs.DrugsDTO
+import com.example.database.drugCategory.DrugCategory
+import com.example.database.drugCategory.DrugCategoryDTO
 import com.example.database.drugs.Drugs
-import com.example.database.drugsInstrucions.DrugInstructionsDTO
-import com.example.database.drugsInstrucions.DrugInstructions
 import io.ktor.http.*
 import io.ktor.server.application.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
-import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
 
 class DrugListController(private val call: ApplicationCall) {
+    suspend fun getDrugCategoryByDrugId() {
+        val drugId = call.parameters["drugId"]?.toIntOrNull()
+        if (drugId == null) {
+            call.respond(HttpStatusCode.BadRequest, "Invalid drug ID")
+            return
+        }
+        val drugCategory = Drugs.getCategoryByDrugId(drugId)
+        if (drugCategory != null) call.respond(HttpStatusCode.OK, drugCategory)
+        else call.respond(HttpStatusCode.NotFound, "Drug category not found for ID $drugId")
+    }
+
     suspend fun getAllDrugs() {
         val drugs = Drugs.getAllDrugs()
         call.respond(drugs)
+    }
+
+    suspend fun getAllDrugCategories() {
+        val drugCategories = DrugCategory.getAllDrugCategories()
+        call.respond(drugCategories)
+    }
+    suspend fun getAllDrugsByCategory() {
+        val categoryId = call.parameters["drugCategoryId"]?.toIntOrNull()
+        if (categoryId != null) {
+            val drugs = Drugs.getDrugsByCategory(categoryId)
+            if (drugs.isNotEmpty()) {
+                call.respond(drugs)
+            } else {
+                call.respond(HttpStatusCode.NotFound, "No drugs found for this category")
+            }
+        } else {
+            call.respond(HttpStatusCode.BadRequest, "Invalid category ID")
+        }
     }
 
     suspend fun getDrugById() {
         val drugId = call.parameters["drugId"]?.toIntOrNull()
         if (drugId != null) {
             val drug = Drugs.getDrugById(drugId)
-            if (drug != null) call.respond(drug)
-            else call.respond(HttpStatusCode.NotFound, "Drug not found")
-        } else call.respond(HttpStatusCode.BadRequest, "Invalid drug ID")
+            if (drug != null) {
+                call.respond(drug)
+            } else {
+                call.respond(HttpStatusCode.NotFound, "Drug not found")
+            }
+        } else {
+            call.respond(HttpStatusCode.BadRequest, "Invalid drug ID")
+        }
+    }
+
+    suspend fun getDrugCategoryById() {
+        val drugCategoryId = call.parameters["drugCategoryId"]?.toIntOrNull()
+        if (drugCategoryId != null) {
+            val drugCategoryName = DrugCategory.getDrugCategoryById(drugCategoryId)
+            if (drugCategoryName != null) {
+                call.respond(drugCategoryName)
+            } else {
+                call.respond(HttpStatusCode.NotFound, "Drug category not found")
+            }
+        } else {
+            call.respond(HttpStatusCode.BadRequest, "Invalid category ID")
+        }
     }
 }
+
 
 //    suspend fun addItemToDrug() {
 //        try {
