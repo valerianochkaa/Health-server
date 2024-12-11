@@ -55,7 +55,7 @@ class TemperatureController(private val call: ApplicationCall) {
                 it[recordDate] = temperaturesDTO.recordDate
             }
         }
-        call.respond(HttpStatusCode.Created, "Temperature record added successfully")
+        call.respond(HttpStatusCode.Created, temperaturesDTO)
     }
 
     private fun getToken(): String? {

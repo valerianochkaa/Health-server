@@ -9,24 +9,21 @@ object Users : Table("users") {
     val userId = integer("userId").autoIncrement()
     val userEmail = varchar("userEmail", 50)
     val userPassword = varchar("userPassword", 50)
-
     override val primaryKey = PrimaryKey(userId, name = "PK_User_ID")
-
-    fun insertUserAndGetId(userDTO: UserDTO): Int {
+    fun insertUserAndGetId(usersDTO: UsersDTO): Int {
         return transaction {
             insert {
-                it[userEmail] = userDTO.userEmail
-                it[userPassword] = userDTO.userPassword
+                it[userEmail] = usersDTO.userEmail
+                it[userPassword] = usersDTO.userPassword
             } get userId
         }
     }
-
-    fun findUserByEmail(email: String): UserDTO? {
+    fun findUserByEmail(email: String): UsersDTO? {
         return try {
             transaction {
                 Users.select { userEmail eq email }
                     .mapNotNull {
-                        UserDTO(
+                        UsersDTO(
                             userId = it[userId],
                             userEmail = it[userEmail],
                             userPassword = it[userPassword]

@@ -16,6 +16,40 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class WeightController(private val call: ApplicationCall) {
+    suspend fun insertWeightAndGetId() {
+        val token = getToken() ?: run {
+            call.respond(HttpStatusCode.BadRequest, "Token is missing")
+            return
+        }
+        val userId = getUserIdByToken(token) ?: run {
+            call.respond(HttpStatusCode.Unauthorized, "Invalid token or user not found")
+            return
+        }
+        val weightsDTO = call.receive<WeightsDTO>().copy(userIdWeights = userId)
+        transaction {
+            Weights.insert {
+                it[userIdWeights] = userId
+                it[weightValue] = weightsDTO.weightValue
+                it[recordDate] = weightsDTO.recordDate
+            }
+        }
+        call.respond(HttpStatusCode.Created, weightsDTO)
+    }
+    private fun getToken(): String? {
+        return call.request.headers["Authorization"]?.removePrefix("Bearer ")
+    }
+    private fun getUserIdByToken(token: String): Int? {
+        val tokenRecord = transaction {
+            Tokens.select { Tokens.token eq token }.singleOrNull()
+        }
+        return tokenRecord?.let {
+            val userEmail = it[Tokens.tokenEmail]
+            transaction {
+                Users.select { Users.userEmail eq userEmail }.singleOrNull()?.get(Users.userId)
+            }
+        }
+    }
+
     suspend fun getAllWeights() {
         val weights = Weights.getAllWeights()
         call.respond(weights)
@@ -37,42 +71,6 @@ class WeightController(private val call: ApplicationCall) {
             if (weight != null) call.respond(weight)
             else call.respond(HttpStatusCode.NotFound, "Weight not found")
         } else call.respond(HttpStatusCode.BadRequest, "Invalid weight ID")
-    }
-
-    suspend fun insertWeightAndGetId() {
-        val token = getToken() ?: run {
-            call.respond(HttpStatusCode.BadRequest, "Token is missing")
-            return
-        }
-        val userId = getUserIdByToken(token) ?: run {
-            call.respond(HttpStatusCode.Unauthorized, "Invalid token or user not found")
-            return
-        }
-        val weightsDTO = call.receive<WeightsDTO>().copy(userIdWeights = userId)
-        transaction {
-            Weights.insert {
-                it[userIdWeights] = userId
-                it[weightValue] = weightsDTO.weightValue
-                it[recordDate] = weightsDTO.recordDate
-            }
-        }
-        call.respond(HttpStatusCode.Created, "Weight record added successfully")
-    }
-
-    private fun getToken(): String? {
-        return call.request.headers["Authorization"]?.removePrefix("Bearer ")
-    }
-
-    private fun getUserIdByToken(token: String): Int? {
-        val tokenRecord = transaction {
-            Tokens.select { Tokens.token eq token }.singleOrNull()
-        }
-        return tokenRecord?.let {
-            val userEmail = it[Tokens.tokenEmail]
-            transaction {
-                Users.select { Users.userEmail eq userEmail }.singleOrNull()?.get(Users.userId)
-            }
-        }
     }
 
     suspend fun deleteWeightById() {

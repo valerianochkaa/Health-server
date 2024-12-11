@@ -1,7 +1,9 @@
 package com.example.database.tokens
 
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.Table
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object Tokens : Table() {
@@ -18,5 +20,11 @@ object Tokens : Table() {
             }
         }
     }
-}
 
+    fun isTokenValid(token: String): Boolean {
+        return transaction {
+            select { Tokens.token eq token }
+                .count() > 0
+        }
+    }
+}

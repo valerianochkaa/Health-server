@@ -6,6 +6,7 @@ import com.example.features.register.configureRegisterRouting
 import com.example.features.temperature.configureTemperatureRouting
 import com.example.features.weight.configureWeightRouting
 import com.example.features.drugList.configureDrugListRouting
+import com.example.features.token.configureTokenRouting
 import com.example.plugins.*
 import io.ktor.server.application.*
 import org.jetbrains.exposed.sql.Database
@@ -21,6 +22,7 @@ fun Application.module() {
     configureRouting()
     configureLoginRouting()
     configureRegisterRouting()
+    configureTokenRouting()
 
     configureWeightRouting()
     configureTemperatureRouting()

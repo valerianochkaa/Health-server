@@ -67,7 +67,7 @@ class PressureController(private val call: ApplicationCall) {
                 it[recordDate] = pressuresDTO.recordDate
             }
         }
-        call.respond(HttpStatusCode.Created, "Pressure record added successfully")
+        call.respond(HttpStatusCode.Created, pressuresDTO)
     }
 
     private fun getToken(): String? {

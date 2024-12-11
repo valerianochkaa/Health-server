@@ -1,6 +1,6 @@
 package com.example.database.drugCategory
 
-data class DrugCategoryDTO(
+data class DrugCategoriesDTO(
     val drugCategoryId : Int? = null,
     val drugCategoryName : String
 )

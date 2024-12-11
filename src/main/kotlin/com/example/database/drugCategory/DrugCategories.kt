@@ -5,16 +5,16 @@ import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object DrugCategory: Table("drug_categories") {
+object DrugCategories: Table("drug_categories") {
     val drugCategoryId = integer("drugCategoryId").autoIncrement()
     val drugCategoryName = varchar("drugCategoryName", 50)
 
     override val primaryKey = PrimaryKey(drugCategoryId, name = "PK_Drug_Category_ID")
 
-    fun getAllDrugCategories(): List<DrugCategoryDTO> {
+    fun getAllDrugCategories(): List<DrugCategoriesDTO> {
         return transaction {
-            DrugCategory.selectAll().mapNotNull { row ->
-                DrugCategoryDTO(
+            DrugCategories.selectAll().mapNotNull { row ->
+                DrugCategoriesDTO(
                     drugCategoryId = row[drugCategoryId],
                     drugCategoryName = row[drugCategoryName]
                 )
@@ -22,11 +22,11 @@ object DrugCategory: Table("drug_categories") {
         }
     }
 
-    fun getDrugCategoryById(categoryId: Int): DrugCategoryDTO? {
+    fun getDrugCategoryById(categoryId: Int): DrugCategoriesDTO? {
         return transaction {
-            DrugCategory.select { DrugCategory.drugCategoryId eq categoryId }
+            DrugCategories.select { DrugCategories.drugCategoryId eq categoryId }
                 .mapNotNull { row ->
-                    DrugCategoryDTO(
+                    DrugCategoriesDTO(
                         drugCategoryId = row[drugCategoryId],
                         drugCategoryName = row[drugCategoryName]
                     )

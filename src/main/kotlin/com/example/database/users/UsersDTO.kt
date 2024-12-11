@@ -1,6 +1,6 @@
 package com.example.database.users
 
-data class UserDTO (
+data class UsersDTO (
     val userId: Int? = null,
     val userEmail: String,
     val userPassword: String

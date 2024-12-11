@@ -2,7 +2,7 @@ package com.example.features.register
 
 import com.example.database.tokens.TokenDTO
 import com.example.database.tokens.Tokens
-import com.example.database.users.UserDTO
+import com.example.database.users.UsersDTO
 import com.example.database.users.Users
 import com.example.untils.isValidEmail
 import io.ktor.http.*
@@ -27,7 +27,7 @@ class RegisterController(private val call: ApplicationCall) {
                     throw IllegalArgumentException("User with this email already exists")
                 }
                 Users.insertUserAndGetId(
-                    UserDTO(
+                    UsersDTO(
                         userEmail = registerReceiveRemote.email,
                         userPassword = registerReceiveRemote.password
                     )

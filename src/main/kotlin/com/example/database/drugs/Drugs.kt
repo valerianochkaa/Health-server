@@ -1,7 +1,7 @@
 package com.example.database.drugs
 
-import com.example.database.drugCategory.DrugCategory
-import com.example.database.drugCategory.DrugCategoryDTO
+import com.example.database.drugCategory.DrugCategories
+import com.example.database.drugCategory.DrugCategoriesDTO
 import com.example.database.drugsInstrucions.DrugInstructions
 import com.example.database.drugsInstrucions.DrugInstructionsDTO
 import org.jetbrains.exposed.sql.*
@@ -9,7 +9,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object Drugs : Table("drugs") {
     val drugId = integer("drugId").autoIncrement()
-    val drugCategoryId = integer("drugCategoryId").references(DrugCategory.drugCategoryId)
+    val drugCategoryId = integer("drugCategoryId").references(DrugCategories.drugCategoryId)
     val drugInstructionId = integer("drugInstructionId").references(DrugInstructions.drugInstructionId)
     val drugName = varchar("drugName", 50)
     val drugPrice = double("drugPrice")
@@ -75,13 +75,13 @@ object Drugs : Table("drugs") {
         }
     }
 
-    fun getCategoryByDrugId(drugId: Int): DrugCategoryDTO? {
+    fun getCategoryByDrugId(drugId: Int): DrugCategoriesDTO? {
         return transaction {
             val categoryId = Drugs.select { Drugs.drugId eq drugId }
                 .mapNotNull { row -> row[Drugs.drugCategoryId] }
                 .singleOrNull()
             categoryId?.let {
-                DrugCategory.getDrugCategoryById(it)
+                DrugCategories.getDrugCategoryById(it)
             }
         }
     }
