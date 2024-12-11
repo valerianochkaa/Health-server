@@ -34,6 +34,8 @@ class WeightController(private val call: ApplicationCall) {
             }
         }
         call.respond(HttpStatusCode.Created, weightsDTO)
+//        call.respond(HttpStatusCode.Created, "Weight record added successfully")
+
     }
     private fun getToken(): String? {
         return call.request.headers["Authorization"]?.removePrefix("Bearer ")
